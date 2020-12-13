@@ -20,17 +20,14 @@ public class BoardGrid : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GenerateGrid();
+        //GenerateGrid();
     }
 
     // Update is called once per frame
-    void Update()
+    /*void Update()
     {
-        if(Input.GetButtonDown("GenerateGrid"))
-        {
-            GenerateGrid();
-        }
-    }
+        
+    }*/
 
     public void GenerateGrid()
     {

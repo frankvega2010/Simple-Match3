@@ -12,13 +12,20 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         Token.OnTokenSelected += CheckTokenChain;
+
+        grid.GenerateGrid();
+        AdjustGrid();
     }
 
-   /* // Update is called once per frame
+    // Update is called once per frame
     void Update()
     {
-        
-    }*/
+        if (Input.GetButtonDown("GenerateGrid"))
+        {
+            grid.GenerateGrid();
+            AdjustGrid();
+        }
+    }
 
     public void CheckTokenChain(Token currentToken)
     {
@@ -139,6 +146,191 @@ public class GameManager : MonoBehaviour
         availableTokens.Clear();
 
         return boolResult;
+    }
+
+    public void AdjustGrid()
+    {
+        int timesGO = 0;
+        bool finishRepeatedTiles = false;
+
+        while (!finishRepeatedTiles)
+        {
+            int amountFinished = 0;
+
+            if (CheckRepeatedColorsHorizontal())
+            {
+                amountFinished++;
+            }
+
+            if (CheckRepeatedColorsVertical())
+            {
+                amountFinished++;
+            }
+
+            if (amountFinished >= 2)
+            {
+                finishRepeatedTiles = true;
+            }
+            else
+            {
+                finishRepeatedTiles = false;
+            }
+
+            Debug.Log("Amount FINISHED : " + amountFinished);
+            timesGO++;
+        }
+
+        Debug.Log("Times WENT : " + timesGO);
+    }
+
+    public void SetRandomData(int column, int row)
+    {
+        TokenInfo newInfo = grid.tokenPresets[Random.Range(0, grid.tokenPresets.Length)];
+        grid.GetCurrentTokens()[column, row].SetData(newInfo.tokenType, newInfo.icon);
+    }
+
+    public bool CheckRepeatedColorsVertical()
+    {
+        bool isDone = true;
+        int findSameColor = 0;
+
+        for (int r = 0; r < grid.GetUsedRows(); r++)
+        {
+            for (int c = 0; c < grid.GetUsedColumns(); c++)
+            {
+                if (r != 0 && r < grid.GetUsedRows() - 1)
+                {
+                    findSameColor++;
+
+                    int automaticMatch = 0;
+                    if(minimumMatch % 2 == 0)
+                    {
+                        automaticMatch = minimumMatch - 1;
+                    }
+                    else
+                    {
+                        automaticMatch = minimumMatch;
+                    }
+
+                    for (int i = 1; i <= automaticMatch-1; i++)
+                    {
+                        if (r - i >= 0)
+                        {
+                            if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c, r - i].tokenType)
+                            {
+                                findSameColor++;
+                            }
+                        }
+
+                        if (r + i < grid.GetUsedRows())
+                        {
+                            if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c, r + i].tokenType)
+                            {
+                                findSameColor++;
+                            }
+                        }
+                    }
+
+                    //////////
+
+                    if (findSameColor >= automaticMatch)
+                    {
+                        SetRandomData(c, r);
+
+                        for (int i = 1; i <= automaticMatch-1; i++)
+                        {
+                            if (r - i >= 0)
+                            {
+                                SetRandomData(c, r - i);
+                            }
+
+                            if (r + i < grid.GetUsedRows())
+                            {
+                                SetRandomData(c, r + i);
+                            }
+
+                        }
+                        
+                        isDone = false;
+                    }
+
+                    findSameColor = 0;
+                }
+            }
+        }
+
+        return isDone;
+    }
+
+    public bool CheckRepeatedColorsHorizontal()
+    {
+        bool isDone = true;
+        int findSameColor = 0;
+
+        for (int r = 0; r < grid.GetUsedRows(); r++)
+        {
+            for (int c = 0; c < grid.GetUsedColumns(); c++)
+            {
+                if (c != 0 && c < grid.GetUsedColumns() - 1)
+                {
+                    findSameColor++;
+
+                    int automaticMatch = 0;
+                    if (minimumMatch % 2 == 0)
+                    {
+                        automaticMatch = minimumMatch - 1;
+                    }
+                    else
+                    {
+                        automaticMatch = minimumMatch;
+                    }
+
+                    for (int i = 1; i <= automaticMatch-1; i++)
+                    {
+                        if (c - i >= 0)
+                        {
+                            if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c - i, r].tokenType)
+                            {
+                                findSameColor++;
+                            }
+                        }
+
+                        if (c + i < grid.GetUsedColumns())
+                        {
+                            if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c + i, r].tokenType)
+                            {
+                                findSameColor++;
+                            }
+                        }
+                    }
+
+                    if (findSameColor >= automaticMatch)
+                    {
+                        SetRandomData(c, r);
+
+                        for (int i = 1; i <= automaticMatch-1; i++)
+                        {
+                            if (c - i >= 0)
+                            {
+                                SetRandomData(c - i, r);
+                            }
+
+                            if (c + i < grid.GetUsedColumns())
+                            {
+                                SetRandomData(c + i, r);
+                            }
+
+                        }
+
+                        isDone = false;
+                    }
+
+                    findSameColor = 0;
+                }
+            }
+        }
+
+        return isDone;
     }
 
     private void OnDestroy()

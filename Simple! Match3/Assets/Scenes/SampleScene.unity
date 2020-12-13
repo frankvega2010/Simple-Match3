@@ -567,7 +567,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bee7ab47d2ce594db0f380aa7e4425b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minimumMatch: 3
+  minimumMatch: 5
   grid: {fileID: 1026787172}
   currentChain: []
 --- !u!1 &1185040944
