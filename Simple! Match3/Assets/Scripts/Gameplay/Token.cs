@@ -25,6 +25,7 @@ public class Token : MonoBehaviour , IPointerClickHandler
     public Image iconImage;
     public Color selectedColor;
     public Color normalColor;
+    public Vector2 gridIndex;
 
     // Start is called before the first frame update
     void Awake()

@@ -58,6 +58,7 @@ public class BoardGrid : MonoBehaviour
                 TokenInfo newInfo = tokenPresets[Random.Range(0, tokenPresets.Length)];
                 tokens[c, r] = tokensGameObject[c, r].GetComponent<Token>();
                 tokens[c, r].SetData(newInfo.tokenType, newInfo.icon);
+                tokens[c, r].gridIndex = new Vector2(c, r);
                 float posX = c * (tokens[c, r].GetComponent<RectTransform>().rect.width + tileSpacing);
                 float posY = r * (-tokens[c, r].GetComponent<RectTransform>().rect.height - tileSpacing);
                 tokensGameObject[c, r].transform.position = new Vector2(initialTransform.position.x + posX, initialTransform.position.y + posY);

@@ -54,8 +54,10 @@ public class GameManager : MonoBehaviour
                     {
                         foreach (Token t in currentChain)
                         {
-                            t.tokenType = Token.TOKEN_TYPES.EMPTY;
-                            t.iconImage.sprite = null;
+                            Destroy(grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y].gameObject);
+                            //grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y] = null;
+                            // t.tokenType = Token.TOKEN_TYPES.EMPTY;
+                            // t.iconImage.sprite = null;
                         }
 
                         currentChain.Clear();
