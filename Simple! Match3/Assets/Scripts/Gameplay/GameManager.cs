@@ -231,8 +231,6 @@ public class GameManager : MonoBehaviour
                         }
                     }
 
-                    //////////
-
                     if (findSameColor >= automaticMatch)
                     {
                         SetRandomData(c, r);
