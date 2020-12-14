@@ -66,6 +66,7 @@ public class GameManager : MonoBehaviour
                             currentChain.Clear();
                             inputEnabled = false;
                             UpdateGrid();
+                            RefillGrid();
 
 
                             //Give points
@@ -255,6 +256,36 @@ public class GameManager : MonoBehaviour
                     }
                 }
 
+            }
+        }
+    }
+
+    public void RefillGrid()
+    {
+        Token[,] currentTokens = grid.GetCurrentTokens();
+
+        for (int r = 0; r < grid.GetUsedRows(); r++)
+        {
+            for (int c = 0; c < grid.GetUsedColumns(); c++)
+            {
+                if(currentTokens[c,r] == null)
+                {
+                    grid.SpawnNewToken(c, r);
+                    //currentTokens[c, r] = currentTokens[c, r];
+
+                    currentTokens[c, r].oldPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
+                        + new Vector2(c * (currentTokens[c, r].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
+                                       0)
+                        + new Vector2(0,+250);
+
+                    currentTokens[c, r].newPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
+                        + new Vector2(c * (currentTokens[c, r].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
+                             r * (-currentTokens[c, r].GetComponent<RectTransform>().rect.height - grid.tileSpacing));
+
+                    currentTokens[c, r].gridIndex = new Vector2(c, r);
+                    movingTokens.Add(currentTokens[c, r]);
+                    currentTokens[c, r].StartLerp();
+                }
             }
         }
     }
