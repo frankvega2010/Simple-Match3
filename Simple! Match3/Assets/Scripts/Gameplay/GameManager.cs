@@ -68,8 +68,8 @@ public class GameManager : MonoBehaviour
                             UpdateGrid();
                             RefillGrid();
 
+                            //Give points * amount of tokens in chain
 
-                            //Give points
                         }
                         else // Cancel Chain
                         {
@@ -237,8 +237,10 @@ public class GameManager : MonoBehaviour
 
                         if (foundEmptySpace)
                         {
+                            grid.GetCurrentTokensGameObject()[c, newTokenRow] = grid.GetCurrentTokensGameObject()[c, r];
                             currentTokens[c, newTokenRow] = currentTokens[c, r];
                             currentTokens[c, r] = null;
+                            grid.GetCurrentTokensGameObject()[c, r] = null;
 
                             currentTokens[c, newTokenRow].oldPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
                                 + new Vector2(c * (currentTokens[c, newTokenRow].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
@@ -250,7 +252,11 @@ public class GameManager : MonoBehaviour
 
                             currentTokens[c, newTokenRow].gridIndex = new Vector2(c, newTokenRow);
                             currentTokens[c, newTokenRow].StartLerp();
-                            movingTokens.Add(currentTokens[c, newTokenRow]);
+                            if(!movingTokens.Contains(currentTokens[c, newTokenRow]))
+                            {
+                                movingTokens.Add(currentTokens[c, newTokenRow]);
+                            }
+                            
                         }
 
                     }
@@ -271,7 +277,6 @@ public class GameManager : MonoBehaviour
                 if(currentTokens[c,r] == null)
                 {
                     grid.SpawnNewToken(c, r);
-                    //currentTokens[c, r] = currentTokens[c, r];
 
                     currentTokens[c, r].oldPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
                         + new Vector2(c * (currentTokens[c, r].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
@@ -281,9 +286,11 @@ public class GameManager : MonoBehaviour
                     currentTokens[c, r].newPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
                         + new Vector2(c * (currentTokens[c, r].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
                              r * (-currentTokens[c, r].GetComponent<RectTransform>().rect.height - grid.tileSpacing));
-
-                    currentTokens[c, r].gridIndex = new Vector2(c, r);
-                    movingTokens.Add(currentTokens[c, r]);
+                    
+                    if (!movingTokens.Contains(currentTokens[c, r]))
+                    {
+                        movingTokens.Add(currentTokens[c, r]);
+                    }
                     currentTokens[c, r].StartLerp();
                 }
             }
@@ -292,45 +299,45 @@ public class GameManager : MonoBehaviour
 
     public void CheckInputAvailability(Token currentToken)
     {
-        movingTokens.Remove(currentToken);
+        if(movingTokens.Contains(currentToken))
+        {
+            movingTokens.Remove(currentToken);
+        }
 
         if(movingTokens.Count <= 0)
         {
-            inputEnabled = true;
+            if(!IsMatchAvailable())
+            {
+                inputEnabled = true;
+            }
         }
     }
 
-   /* public bool CheckForAnyEmptySpace()
+    public bool IsMatchAvailable()
     {
-        for (int r = 0; r < grid.GetUsedRows(); r++)
+        inputEnabled = false;
+        bool foundMatch = false;
+        List<Vector2> indexToDelete = new List<Vector2>();
+
+        if (!CheckMatchHorizontal())
         {
-            for (int c = 0; c < grid.GetUsedColumns(); c++)
-            {
-                if (grid.GetCurrentTokens()[c, r] == null)
-                {
-                    bool isKnown = false;
-                    Vector2 space = new Vector2(c, r);
-
-                    foreach (Vector2 knownEmptySpace in knownEmptySpaces)
-                    {
-                        if(space == knownEmptySpace)
-                        {
-                            isKnown = true;
-                        }
-                    }
-
-                    if(!isKnown)
-                    {
-                        return true;
-                    }
-                    
-                }
-            }
+            foundMatch = true;
         }
 
-        return false;
-    }*/
+        if (!CheckMatchVertical())
+        {
+            foundMatch = true;
+        }
 
+        if(foundMatch)
+        {
+            UpdateGrid();
+            RefillGrid();
+        }
+        
+
+        return foundMatch;
+    }
 
     public void SetRandomData(int column, int row)
     {
@@ -465,6 +472,171 @@ public class GameManager : MonoBehaviour
                             if (c + i < grid.GetUsedColumns())
                             {
                                 SetRandomData(c + i, r);
+                            }
+
+                        }
+
+                        isDone = false;
+                    }
+
+                    findSameColor = 0;
+                }
+            }
+        }
+
+        return isDone;
+    }
+
+
+    public bool CheckMatchHorizontal()
+    {
+        bool isDone = true;
+        int findSameColor = 0;
+
+        for (int r = 0; r < grid.GetUsedRows(); r++)
+        {
+            for (int c = 0; c < grid.GetUsedColumns(); c++)
+            {
+                if (c != 0 && c < grid.GetUsedColumns() - 1)
+                {
+                    findSameColor++;
+
+                    int automaticMatch = 0;
+                    if (minimumMatch % 2 == 0)
+                    {
+                        automaticMatch = minimumMatch - 1;
+                    }
+                    else
+                    {
+                        automaticMatch = minimumMatch;
+                    }
+
+
+                    if (grid.GetCurrentTokens()[c, r] != null)
+                    {
+                        for (int i = 1; i <= automaticMatch - 1; i++)
+                        {
+                            if (c - i >= 0 && grid.GetCurrentTokens()[c - i, r] != null)
+                            {
+                                if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c - i, r].tokenType)
+                                {
+                                    findSameColor++;
+                                }
+                            }
+
+                            if (c + i < grid.GetUsedColumns() && grid.GetCurrentTokens()[c + i, r] != null)
+                            {
+                                if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c + i, r].tokenType)
+                                {
+                                    findSameColor++;
+                                }
+                            }
+                        }
+                    }
+                        
+
+                    if (findSameColor >= automaticMatch)
+                    {
+                        //GIVE POINTS
+
+                        Destroy(grid.GetCurrentTokens()[c, r].gameObject);
+                        grid.GetCurrentTokens()[c, r] = null;
+
+                        for (int i = 1; i <= automaticMatch - 1; i++)
+                        {
+                            if (c - i >= 0 && grid.GetCurrentTokens()[c - i, r] != null)
+                            {
+                                Destroy(grid.GetCurrentTokens()[c - i, r].gameObject);
+                                grid.GetCurrentTokens()[c - i, r] = null;
+                            }
+
+                            if (c + i < grid.GetUsedColumns() && grid.GetCurrentTokens()[c + i, r] != null)
+                            {
+                                Destroy(grid.GetCurrentTokens()[c + i, r].gameObject);
+                                grid.GetCurrentTokens()[c + i, r] = null;
+                            }
+
+                        }
+
+                        isDone = false;
+                    }
+
+                    findSameColor = 0;
+                }
+            }
+        }
+
+        return isDone;
+    }
+
+    public bool CheckMatchVertical()
+    {
+        bool isDone = true;
+        int findSameColor = 0;
+
+        for (int r = 0; r < grid.GetUsedRows(); r++)
+        {
+            for (int c = 0; c < grid.GetUsedColumns(); c++)
+            {
+                if (r != 0 && r < grid.GetUsedRows() - 1)
+                {
+                    findSameColor++;
+
+                    int automaticMatch = 0;
+                    if (minimumMatch % 2 == 0)
+                    {
+                        automaticMatch = minimumMatch - 1;
+                    }
+                    else
+                    {
+                        automaticMatch = minimumMatch;
+                    }
+
+
+                    if (grid.GetCurrentTokens()[c, r] != null)
+                    {
+                        for (int i = 1; i <= automaticMatch - 1; i++)
+                        {
+
+                            if (r - i >= 0 && grid.GetCurrentTokens()[c, r - i] != null)
+                            {
+                                if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c, r - i].tokenType)
+                                {
+                                    findSameColor++;
+                                }
+                            }
+
+                            if (r + i < grid.GetUsedRows() && grid.GetCurrentTokens()[c, r + i] != null)
+                            {
+                                if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c, r + i].tokenType)
+                                {
+                                    findSameColor++;
+                                }
+                            }
+                        }
+                    }
+
+                    
+
+                    if (findSameColor >= automaticMatch)
+                    {
+                        //GIVE POINTS
+
+                        Destroy(grid.GetCurrentTokens()[c, r].gameObject);
+                        grid.GetCurrentTokens()[c, r] = null;
+
+                        for (int i = 1; i <= automaticMatch - 1; i++)
+                        {
+                            if (r - i >= 0 && grid.GetCurrentTokens()[c, r - i] != null)
+                            {
+                                Destroy(grid.GetCurrentTokens()[c, r - i].gameObject);
+                                grid.GetCurrentTokens()[c, r - i] = null;
+                            }
+
+                            if (r + i < grid.GetUsedRows() && grid.GetCurrentTokens()[c, r + i] != null)
+                            {
+                                Destroy(grid.GetCurrentTokens()[c, r + i].gameObject);
+                                grid.GetCurrentTokens()[c, r + i] = null;
                             }
 
                         }

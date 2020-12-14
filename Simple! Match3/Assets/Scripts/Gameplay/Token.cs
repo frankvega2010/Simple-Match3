@@ -102,6 +102,6 @@ public class Token : MonoBehaviour , IPointerClickHandler
             OnTokenSelected(this);
         }
 
-        Debug.Log("SELECTED");
+       // Debug.Log("SELECTED");
     }
 }

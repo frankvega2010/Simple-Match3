@@ -37,8 +37,8 @@ public class BoardGrid : MonoBehaviour
             {
                 for (int c = 0; c < usedColumns; c++)
                 {
+                    Destroy(tokensGameObject[c, r].gameObject);
                     tokens[c, r] = null;
-                    Destroy(tokensGameObject[c, r]);
                 }
             }
         }
@@ -69,6 +69,7 @@ public class BoardGrid : MonoBehaviour
     public void SpawnNewToken(int column, int row)
     {
         tokensGameObject[column, row] = Instantiate(tokenPrefab, board.transform, false);
+        tokensGameObject[column, row].transform.position = initialTransform.position;
         tokensGameObject[column, row].transform.position += new Vector3(0, 300, 0);
         tokensGameObject[column, row].SetActive(true);
         TokenInfo newInfo = tokenPresets[Random.Range(0, tokenPresets.Length)];
@@ -90,5 +91,10 @@ public class BoardGrid : MonoBehaviour
     public Token[,] GetCurrentTokens()
     {
         return tokens;
+    }
+
+    public GameObject[,] GetCurrentTokensGameObject()
+    {
+        return tokensGameObject;
     }
 }

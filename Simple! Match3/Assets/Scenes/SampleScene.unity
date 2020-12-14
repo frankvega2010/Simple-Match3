@@ -532,8 +532,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileSpacing: 0
-  rows: 7
-  columns: 7
+  rows: 8
+  columns: 8
   initialTransform: {fileID: 1819153130}
   board: {fileID: 596317786}
   tokenPrefab: {fileID: 4014200540807347005, guid: 9b6bfc77287790444886ac31648b38d2, type: 3}
@@ -567,7 +567,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bee7ab47d2ce594db0f380aa7e4425b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minimumMatch: 3
+  minimumMatch: 5
   grid: {fileID: 1026787172}
   currentChain: []
   inputEnabled: 1
