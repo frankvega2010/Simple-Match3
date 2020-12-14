@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public int minimumMatch;
-    public BoardGrid grid;
-    public List<Token> currentChain;
+    public int minimumMatch = 0;
+    public BoardGrid grid = null;
+    public List<Token> currentChain = new List<Token>();
+    public bool inputEnabled = false;
+    [SerializeField]
+    private List<Token> movingTokens = new List<Token>();
 
     // Start is called before the first frame update
     void Start()
     {
         Token.OnTokenSelected += CheckTokenChain;
-
+        Token.OnTokenLerpFinish += CheckInputAvailability;
         grid.GenerateGrid();
         AdjustGrid();
     }
@@ -29,53 +32,58 @@ public class GameManager : MonoBehaviour
 
     public void CheckTokenChain(Token currentToken)
     {
-        if(currentChain.Count <= 0)
+        if(inputEnabled)
         {
-            currentChain.Add(currentToken);
-            currentToken.OnAdd();
-        }
-        else
-        {
-            if(currentToken == currentChain[currentChain.Count-1]) // Remove token from chain
+            if (currentChain.Count <= 0)
             {
-                currentChain.Remove(currentToken);
-                currentToken.OnRemove();
+                currentChain.Add(currentToken);
+                currentToken.OnAdd();
             }
             else
             {
-                if(CheckAdjacentTokens(currentToken)) // Add new token
+                if (currentToken == currentChain[currentChain.Count - 1]) // Remove token from chain
                 {
-                    currentChain.Add(currentToken);
-                    currentToken.OnAdd();
+                    currentChain.Remove(currentToken);
+                    currentToken.OnRemove();
                 }
                 else
                 {
-                    if(currentChain.Count >= minimumMatch) // Do match
+                    if (CheckAdjacentTokens(currentToken)) // Add new token
                     {
-                        foreach (Token t in currentChain)
-                        {
-                            Destroy(grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y].gameObject);
-                            //grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y] = null;
-                            // t.tokenType = Token.TOKEN_TYPES.EMPTY;
-                            // t.iconImage.sprite = null;
-                        }
-
-                        currentChain.Clear();
-
-                        //Give points
+                        currentChain.Add(currentToken);
+                        currentToken.OnAdd();
                     }
-                    else // Cancel Chain
+                    else
                     {
-                        foreach (Token t in currentChain)
+                        if (currentChain.Count >= minimumMatch) // Do match
                         {
-                            t.OnCancel();
-                        }
+                            foreach (Token t in currentChain)
+                            {
+                                Destroy(grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y].gameObject);
+                                grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y] = null;
+                            }
 
-                        currentChain.Clear();
+                            currentChain.Clear();
+                            inputEnabled = false;
+                            UpdateGrid();
+
+
+                            //Give points
+                        }
+                        else // Cancel Chain
+                        {
+                            foreach (Token t in currentChain)
+                            {
+                                t.OnCancel();
+                            }
+
+                            currentChain.Clear();
+                        }
                     }
                 }
             }
         }
+        
     }
 
     public bool CheckAdjacentTokens(Token currentToken)
@@ -184,6 +192,114 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("Times WENT : " + timesGO);
     }
+
+    public void UpdateGrid()
+    {
+        int newTokenRow = -1;
+        bool foundEmptySpace = false;
+        Token[,] currentTokens = grid.GetCurrentTokens();
+        bool movableTokensAvailable = true;
+
+        while(movableTokensAvailable)
+        {
+            movableTokensAvailable = false;
+
+            for (int r = 0; r < grid.GetUsedRows(); r++)
+            {
+                for (int c = 0; c < grid.GetUsedColumns(); c++)
+                {
+                    if (currentTokens[c, r] != null)
+                    {
+                        foundEmptySpace = false;
+
+                        for (int i = r + 1; i < grid.GetUsedRows(); i++)
+                        {
+                            if (i < grid.GetUsedRows() && i >= 0)
+                            {
+                                if (currentTokens[c, i] == null)
+                                {
+                                    newTokenRow = i;
+                                    foundEmptySpace = true;
+                                    movableTokensAvailable = true;
+                                }
+                                else
+                                {
+                                    i = grid.GetUsedRows();
+                                }
+                            }
+                            else
+                            {
+                                i = grid.GetUsedRows();
+                            }
+
+                        }
+
+                        if (foundEmptySpace)
+                        {
+                            currentTokens[c, newTokenRow] = currentTokens[c, r];
+                            currentTokens[c, r] = null;
+
+                            currentTokens[c, newTokenRow].oldPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
+                                + new Vector2(c * (currentTokens[c, newTokenRow].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
+                                               r * (-currentTokens[c, newTokenRow].GetComponent<RectTransform>().rect.height - grid.tileSpacing));
+
+                            currentTokens[c, newTokenRow].newPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
+                                + new Vector2(c * (currentTokens[c, newTokenRow].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
+                                     newTokenRow * (-currentTokens[c, newTokenRow].GetComponent<RectTransform>().rect.height - grid.tileSpacing));
+
+                            currentTokens[c, newTokenRow].gridIndex = new Vector2(c, newTokenRow);
+                            currentTokens[c, newTokenRow].StartLerp();
+                            movingTokens.Add(currentTokens[c, newTokenRow]);
+                        }
+
+                    }
+                }
+
+            }
+        }
+    }
+
+    public void CheckInputAvailability(Token currentToken)
+    {
+        movingTokens.Remove(currentToken);
+
+        if(movingTokens.Count <= 0)
+        {
+            inputEnabled = true;
+        }
+    }
+
+   /* public bool CheckForAnyEmptySpace()
+    {
+        for (int r = 0; r < grid.GetUsedRows(); r++)
+        {
+            for (int c = 0; c < grid.GetUsedColumns(); c++)
+            {
+                if (grid.GetCurrentTokens()[c, r] == null)
+                {
+                    bool isKnown = false;
+                    Vector2 space = new Vector2(c, r);
+
+                    foreach (Vector2 knownEmptySpace in knownEmptySpaces)
+                    {
+                        if(space == knownEmptySpace)
+                        {
+                            isKnown = true;
+                        }
+                    }
+
+                    if(!isKnown)
+                    {
+                        return true;
+                    }
+                    
+                }
+            }
+        }
+
+        return false;
+    }*/
+
 
     public void SetRandomData(int column, int row)
     {
@@ -336,5 +452,6 @@ public class GameManager : MonoBehaviour
     private void OnDestroy()
     {
         Token.OnTokenSelected -= CheckTokenChain;
+        Token.OnTokenLerpFinish -= CheckInputAvailability;
     }
 }

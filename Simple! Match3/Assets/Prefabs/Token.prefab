@@ -92,9 +92,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tokenType: 0
   icon: {fileID: 0}
-  iconImage: {fileID: 0}
+  moveSpeed: 5
   selectedColor: {r: 0.2735849, g: 0.2735849, b: 0.2735849, a: 1}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
+  oldPosition: {x: 0, y: 0}
+  newPosition: {x: 0, y: 0}
+  gridIndex: {x: 0, y: 0}
 --- !u!61 &1819153133
 BoxCollider2D:
   m_ObjectHideFlags: 0

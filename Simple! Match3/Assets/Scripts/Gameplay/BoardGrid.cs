@@ -66,6 +66,15 @@ public class BoardGrid : MonoBehaviour
         }
     }
 
+    public void SpawnNewToken(int column, int row)
+    {
+        tokensGameObject[column, row] = Instantiate(tokenPrefab, board.transform, false);
+        TokenInfo newInfo = tokenPresets[Random.Range(0, tokenPresets.Length)];
+        tokens[column, row] = tokensGameObject[column, row].GetComponent<Token>();
+        tokens[column, column].SetData(newInfo.tokenType, newInfo.icon);
+        tokens[column, column].gridIndex = new Vector2(column, column);
+    }
+
     public int GetUsedRows()
     {
         return usedRows;
