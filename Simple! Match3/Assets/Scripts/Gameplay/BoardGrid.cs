@@ -57,7 +57,7 @@ public class BoardGrid : MonoBehaviour
                 tokensGameObject[c, r].SetActive(true);
                 TokenInfo newInfo = tokenPresets[Random.Range(0, tokenPresets.Length)];
                 tokens[c, r] = tokensGameObject[c, r].GetComponent<Token>();
-                tokens[c, r].SetData(newInfo.tokenType, newInfo.icon);
+                tokens[c, r].SetData(newInfo.tokenType, newInfo.icon, newInfo.points);
                 tokens[c, r].gridIndex = new Vector2(c, r);
                 float posX = c * (tokens[c, r].GetComponent<RectTransform>().rect.width + tileSpacing);
                 float posY = r * (-tokens[c, r].GetComponent<RectTransform>().rect.height - tileSpacing);
@@ -74,7 +74,7 @@ public class BoardGrid : MonoBehaviour
         tokensGameObject[column, row].SetActive(true);
         TokenInfo newInfo = tokenPresets[Random.Range(0, tokenPresets.Length)];
         tokens[column, row] = tokensGameObject[column, row].GetComponent<Token>();
-        tokens[column, row].SetData(newInfo.tokenType, newInfo.icon);
+        tokens[column, row].SetData(newInfo.tokenType, newInfo.icon, newInfo.points);
         tokens[column, row].gridIndex = new Vector2(column, row);
     }
 

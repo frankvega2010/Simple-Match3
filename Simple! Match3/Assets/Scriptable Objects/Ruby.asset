@@ -1,16 +1,3 @@
-%YAML 1.1
-%TAG !u! tag:unity3d.com,2011:
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74b7423a0324e65499f1a06cf61d4508, type: 3}
-  m_Name: Ruby
-  m_EditorClassIdentifier: 
-  tokenType: 1
-  icon: {fileID: 21300000, guid: e942f91e6c895574d89b02014076d040, type: 3}
+version https://git-lfs.github.com/spec/v1
+oid sha256:a18f298140540ddced21769da7f1af740875b32990622cf6dce05738e29235a1
+size 496

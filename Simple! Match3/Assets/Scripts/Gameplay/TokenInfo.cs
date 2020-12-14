@@ -7,4 +7,5 @@ public class TokenInfo : ScriptableObject
 {
     public Token.TOKEN_TYPES tokenType;
     public Sprite icon;
+    public int points;
 }

@@ -4,20 +4,29 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public int minimumMatch = 0;
+    public delegate void OnGameManagerAction(int amount);
+    public static OnGameManagerAction OnPlayerScore;
+    public static OnGameManagerAction OnPlayerMatch;
+
+    [Header("Main Config"),Space]
     public BoardGrid grid = null;
+    public int minimumMatch = 0;
+    public int maxTurns = 0;
+    public int currentPoints = 0;
+
+    [Header("Public Data"), Space]
     public List<Token> currentChain = new List<Token>();
     public bool inputEnabled = false;
     [SerializeField]
     private List<Token> movingTokens = new List<Token>();
+    private int turnsLeft = 0;
 
     // Start is called before the first frame update
     void Start()
     {
         Token.OnTokenSelected += CheckTokenChain;
         Token.OnTokenLerpFinish += CheckInputAvailability;
-        grid.GenerateGrid();
-        AdjustGrid();
+        Restart();
     }
 
     // Update is called once per frame
@@ -25,9 +34,28 @@ public class GameManager : MonoBehaviour
     {
         if (Input.GetButtonDown("GenerateGrid"))
         {
-            grid.GenerateGrid();
-            AdjustGrid();
+            Restart();
         }
+    }
+
+    public void Restart()
+    {
+        currentPoints = 0;
+        turnsLeft = maxTurns;
+
+        if (OnPlayerMatch != null)
+        {
+            OnPlayerMatch(turnsLeft);
+        }
+
+        if (OnPlayerScore != null)
+        {
+            OnPlayerScore(currentPoints);
+        }
+
+        currentChain.Clear();
+        grid.GenerateGrid();
+        AdjustGrid();
     }
 
     public void CheckTokenChain(Token currentToken)
@@ -55,20 +83,49 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
+                        
                         if (currentChain.Count >= minimumMatch) // Do match
                         {
-                            foreach (Token t in currentChain)
+                            if (turnsLeft > 0)
                             {
-                                Destroy(grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y].gameObject);
-                                grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y] = null;
+                                int points = 0;
+
+                                foreach (Token t in currentChain)
+                                {
+                                    points += t.points;
+                                    Destroy(grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y].gameObject);
+                                    grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y] = null;
+                                }
+
+                                points *= currentChain.Count;
+
+                                currentChain.Clear();
+                                inputEnabled = false;
+                                UpdateGrid();
+                                RefillGrid();
+
+                                //Give points * amount of tokens in chain
+
+                                currentPoints += points;
+
+                                if (OnPlayerScore != null)
+                                {
+                                    OnPlayerScore(currentPoints);
+                                }
+
+                                turnsLeft--;
+
+                                if(OnPlayerMatch != null)
+                                {
+                                    OnPlayerMatch(turnsLeft);
+                                }
+
+                                if(turnsLeft <= 0)
+                                {
+                                    // GAME FINISHED
+                                }
                             }
-
-                            currentChain.Clear();
-                            inputEnabled = false;
-                            UpdateGrid();
-                            RefillGrid();
-
-                            //Give points * amount of tokens in chain
+                            
 
                         }
                         else // Cancel Chain
@@ -342,7 +399,7 @@ public class GameManager : MonoBehaviour
     public void SetRandomData(int column, int row)
     {
         TokenInfo newInfo = grid.tokenPresets[Random.Range(0, grid.tokenPresets.Length)];
-        grid.GetCurrentTokens()[column, row].SetData(newInfo.tokenType, newInfo.icon);
+        grid.GetCurrentTokens()[column, row].SetData(newInfo.tokenType, newInfo.icon, newInfo.points);
     }
 
     public bool CheckRepeatedColorsVertical()
@@ -539,6 +596,9 @@ public class GameManager : MonoBehaviour
                     {
                         //GIVE POINTS
 
+                        int points = 0;
+                        points += grid.GetCurrentTokens()[c, r].points;
+
                         Destroy(grid.GetCurrentTokens()[c, r].gameObject);
                         grid.GetCurrentTokens()[c, r] = null;
 
@@ -546,16 +606,27 @@ public class GameManager : MonoBehaviour
                         {
                             if (c - i >= 0 && grid.GetCurrentTokens()[c - i, r] != null)
                             {
+                                points += grid.GetCurrentTokens()[c - i, r].points;
                                 Destroy(grid.GetCurrentTokens()[c - i, r].gameObject);
                                 grid.GetCurrentTokens()[c - i, r] = null;
                             }
 
                             if (c + i < grid.GetUsedColumns() && grid.GetCurrentTokens()[c + i, r] != null)
                             {
+                                points += grid.GetCurrentTokens()[c + i, r].points;
                                 Destroy(grid.GetCurrentTokens()[c + i, r].gameObject);
                                 grid.GetCurrentTokens()[c + i, r] = null;
                             }
 
+                        }
+
+                        points *= findSameColor;
+
+                        currentPoints += points;
+
+                        if(OnPlayerScore != null)
+                        {
+                            OnPlayerScore(currentPoints);
                         }
 
                         isDone = false;
@@ -622,6 +693,9 @@ public class GameManager : MonoBehaviour
                     {
                         //GIVE POINTS
 
+                        int points = 0;
+                        points += grid.GetCurrentTokens()[c, r].points;
+
                         Destroy(grid.GetCurrentTokens()[c, r].gameObject);
                         grid.GetCurrentTokens()[c, r] = null;
 
@@ -629,16 +703,26 @@ public class GameManager : MonoBehaviour
                         {
                             if (r - i >= 0 && grid.GetCurrentTokens()[c, r - i] != null)
                             {
+                                points += grid.GetCurrentTokens()[c, r - i].points;
                                 Destroy(grid.GetCurrentTokens()[c, r - i].gameObject);
                                 grid.GetCurrentTokens()[c, r - i] = null;
                             }
 
                             if (r + i < grid.GetUsedRows() && grid.GetCurrentTokens()[c, r + i] != null)
                             {
+                                points += grid.GetCurrentTokens()[c, r + i].points;
                                 Destroy(grid.GetCurrentTokens()[c, r + i].gameObject);
                                 grid.GetCurrentTokens()[c, r + i] = null;
                             }
 
+                        }
+
+                        points *= findSameColor;
+                        currentPoints += points;
+
+                        if (OnPlayerScore != null)
+                        {
+                            OnPlayerScore(currentPoints);
                         }
 
                         isDone = false;

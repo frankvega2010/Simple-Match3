@@ -15,15 +15,22 @@ public class Token : MonoBehaviour , IPointerClickHandler
     public enum TOKEN_TYPES
     {
         EMPTY,
-        RUBY,
-        EMERALD,
-        AZZURE,
+        SPIRIT,
+        ICE,
+        FOREST,
+        FLASH,
+        FIRE,
+        EARTH,
+        DEMON,
+        INSECT,
+        AIR,
         ALL_TYPES
     }
 
     [Header("Main Config"),Space]
     public TOKEN_TYPES tokenType;
     public Sprite icon;
+    public int points;
     public float moveSpeed;
 
     [Header("Color Config"), Space]
@@ -67,10 +74,11 @@ public class Token : MonoBehaviour , IPointerClickHandler
         }
     }
 
-    public void SetData(TOKEN_TYPES type, Sprite newIcon)
+    public void SetData(TOKEN_TYPES type, Sprite newIcon, int newPoints)
     {
         tokenType = type;
         icon = newIcon;
+        points = newPoints;
         iconImage.sprite = icon;
     }
 
