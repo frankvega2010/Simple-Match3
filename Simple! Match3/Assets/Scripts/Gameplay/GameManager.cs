@@ -309,11 +309,12 @@ public class GameManager : MonoBehaviour
 
                             currentTokens[c, newTokenRow].gridIndex = new Vector2(c, newTokenRow);
                             currentTokens[c, newTokenRow].StartLerp();
+
                             if(!movingTokens.Contains(currentTokens[c, newTokenRow]))
                             {
                                 movingTokens.Add(currentTokens[c, newTokenRow]);
                             }
-                            
+                            //movingTokens.Add(currentTokens[c, newTokenRow]);
                         }
 
                     }
@@ -343,11 +344,14 @@ public class GameManager : MonoBehaviour
                     currentTokens[c, r].newPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
                         + new Vector2(c * (currentTokens[c, r].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
                              r * (-currentTokens[c, r].GetComponent<RectTransform>().rect.height - grid.tileSpacing));
-                    
+
                     if (!movingTokens.Contains(currentTokens[c, r]))
                     {
                         movingTokens.Add(currentTokens[c, r]);
                     }
+
+                    //movingTokens.Add(currentTokens[c, r]);
+
                     currentTokens[c, r].StartLerp();
                 }
             }
@@ -361,8 +365,11 @@ public class GameManager : MonoBehaviour
             movingTokens.Remove(currentToken);
         }
 
-        if(movingTokens.Count <= 0)
+        //movingTokens.Remove(currentToken);
+
+        if (movingTokens.Count <= 0)
         {
+            //Debug.Log("nice");
             if(!IsMatchAvailable())
             {
                 inputEnabled = true;
@@ -374,7 +381,6 @@ public class GameManager : MonoBehaviour
     {
         inputEnabled = false;
         bool foundMatch = false;
-        List<Vector2> indexToDelete = new List<Vector2>();
 
         if (!CheckMatchHorizontal())
         {
@@ -386,12 +392,13 @@ public class GameManager : MonoBehaviour
             foundMatch = true;
         }
 
-        if(foundMatch)
+        /*if(foundMatch)
         {
-            UpdateGrid();
-            RefillGrid();
-        }
-        
+            
+        }*/
+
+        UpdateGrid();
+        RefillGrid();
 
         return foundMatch;
     }
@@ -406,6 +413,7 @@ public class GameManager : MonoBehaviour
     {
         bool isDone = true;
         int findSameColor = 0;
+        List<Vector2> tokenToRandomizeIndex = new List<Vector2>();
 
         for (int r = 0; r < grid.GetUsedRows(); r++)
         {
@@ -414,57 +422,64 @@ public class GameManager : MonoBehaviour
                 if (r != 0 && r < grid.GetUsedRows() - 1)
                 {
                     findSameColor++;
+                    tokenToRandomizeIndex.Add(new Vector2(c, r));
 
-                    int automaticMatch = 0;
+                    int automaticMinMatch = 0;
+                    int automaticLoop = 0;
                     if(minimumMatch % 2 == 0)
                     {
-                        automaticMatch = minimumMatch - 1;
+                        automaticMinMatch = minimumMatch - 1;
                     }
                     else
                     {
-                        automaticMatch = minimumMatch;
+                        automaticMinMatch = minimumMatch;
                     }
 
-                    for (int i = 1; i <= automaticMatch-1; i++)
+                    automaticLoop = grid.GetUsedRows() / 2;
+
+                    for (int i = 1; i <= automaticLoop; i++)
                     {
                         if (r - i >= 0)
                         {
                             if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c, r - i].tokenType)
                             {
                                 findSameColor++;
+                                tokenToRandomizeIndex.Add(new Vector2(c, r-i));
+                            }
+                            else
+                            {
+                                i = automaticLoop;
                             }
                         }
+                    }
 
+                    for (int i = 1; i <= automaticLoop; i++)
+                    {
                         if (r + i < grid.GetUsedRows())
                         {
                             if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c, r + i].tokenType)
                             {
                                 findSameColor++;
+                                tokenToRandomizeIndex.Add(new Vector2(c, r + i));
+                            }
+                            else
+                            {
+                                i = automaticLoop;
                             }
                         }
                     }
 
-                    if (findSameColor >= automaticMatch)
+                    if (findSameColor >= automaticMinMatch)
                     {
-                        SetRandomData(c, r);
-
-                        for (int i = 1; i <= automaticMatch-1; i++)
+                        foreach (Vector2 v in tokenToRandomizeIndex)
                         {
-                            if (r - i >= 0)
-                            {
-                                SetRandomData(c, r - i);
-                            }
-
-                            if (r + i < grid.GetUsedRows())
-                            {
-                                SetRandomData(c, r + i);
-                            }
-
+                            SetRandomData((int)v.x, (int)v.y);
                         }
-                        
+
                         isDone = false;
                     }
 
+                    tokenToRandomizeIndex.Clear();
                     findSameColor = 0;
                 }
             }
@@ -477,6 +492,7 @@ public class GameManager : MonoBehaviour
     {
         bool isDone = true;
         int findSameColor = 0;
+        List<Vector2> tokenToRandomizeIndex = new List<Vector2>();
 
         for (int r = 0; r < grid.GetUsedRows(); r++)
         {
@@ -485,57 +501,66 @@ public class GameManager : MonoBehaviour
                 if (c != 0 && c < grid.GetUsedColumns() - 1)
                 {
                     findSameColor++;
+                    tokenToRandomizeIndex.Add(new Vector2(c, r));
 
-                    int automaticMatch = 0;
+                    int automaticMinMatch = 0;
+                    int automaticLoop = 0;
                     if (minimumMatch % 2 == 0)
                     {
-                        automaticMatch = minimumMatch - 1;
+                        automaticMinMatch = minimumMatch - 1;
                     }
                     else
                     {
-                        automaticMatch = minimumMatch;
+                        automaticMinMatch = minimumMatch;
                     }
 
-                    for (int i = 1; i <= automaticMatch-1; i++)
+                    automaticLoop = grid.GetUsedColumns() / 2;
+
+
+                    for (int i = 1; i <= automaticLoop; i++)
                     {
                         if (c - i >= 0)
                         {
                             if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c - i, r].tokenType)
                             {
                                 findSameColor++;
+                                tokenToRandomizeIndex.Add(new Vector2(c-i, r));
+                            }
+                            else
+                            {
+                                i = automaticLoop;
                             }
                         }
+                    }
+                        
 
+                    for (int i = 1; i <= automaticLoop; i++)
+                    {
                         if (c + i < grid.GetUsedColumns())
                         {
                             if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c + i, r].tokenType)
                             {
                                 findSameColor++;
+                                tokenToRandomizeIndex.Add(new Vector2(c + i, r));
+                            }
+                            else
+                            {
+                                i = automaticLoop;
                             }
                         }
                     }
 
-                    if (findSameColor >= automaticMatch)
+                    if (findSameColor >= automaticMinMatch)
                     {
-                        SetRandomData(c, r);
-
-                        for (int i = 1; i <= automaticMatch-1; i++)
+                        foreach (Vector2 v in tokenToRandomizeIndex)
                         {
-                            if (c - i >= 0)
-                            {
-                                SetRandomData(c - i, r);
-                            }
-
-                            if (c + i < grid.GetUsedColumns())
-                            {
-                                SetRandomData(c + i, r);
-                            }
-
+                            SetRandomData((int)v.x, (int)v.y);
                         }
 
                         isDone = false;
                     }
 
+                    tokenToRandomizeIndex.Clear();
                     findSameColor = 0;
                 }
             }
@@ -549,6 +574,7 @@ public class GameManager : MonoBehaviour
     {
         bool isDone = true;
         int findSameColor = 0;
+        List<Vector2> tokenToDeleteIndex = new List<Vector2>();
 
         for (int r = 0; r < grid.GetUsedRows(); r++)
         {
@@ -557,67 +583,78 @@ public class GameManager : MonoBehaviour
                 if (c != 0 && c < grid.GetUsedColumns() - 1)
                 {
                     findSameColor++;
+                    tokenToDeleteIndex.Add(new Vector2(c, r));
 
-                    int automaticMatch = 0;
+                    int automaticMinMatch = 0;
+                    int automaticLoop = 0;
                     if (minimumMatch % 2 == 0)
                     {
-                        automaticMatch = minimumMatch - 1;
+                        automaticMinMatch = minimumMatch - 1;
                     }
                     else
                     {
-                        automaticMatch = minimumMatch;
+                        automaticMinMatch = minimumMatch;
                     }
 
-
+                    automaticLoop = grid.GetUsedColumns() / 2;
+                    
+                        
                     if (grid.GetCurrentTokens()[c, r] != null)
                     {
-                        for (int i = 1; i <= automaticMatch - 1; i++)
+                        for (int i = 1; i <= automaticLoop; i++)
                         {
                             if (c - i >= 0 && grid.GetCurrentTokens()[c - i, r] != null)
                             {
                                 if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c - i, r].tokenType)
                                 {
                                     findSameColor++;
+                                    tokenToDeleteIndex.Add(new Vector2(c - i, r));
+                                }
+                                else
+                                {
+                                    i = automaticLoop;
                                 }
                             }
+                            else
+                            {
+                                i = automaticLoop;
+                            }
+                        }
 
+
+                        for (int i = 1; i <= automaticLoop; i++)
+                        {
                             if (c + i < grid.GetUsedColumns() && grid.GetCurrentTokens()[c + i, r] != null)
                             {
                                 if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c + i, r].tokenType)
                                 {
                                     findSameColor++;
+                                    tokenToDeleteIndex.Add(new Vector2(c + i, r));
                                 }
+                                else
+                                {
+                                    i = automaticLoop;
+                                }
+                            }
+                            else
+                            {
+                                i = automaticLoop;
                             }
                         }
                     }
                         
 
-                    if (findSameColor >= automaticMatch)
+                    if (findSameColor >= automaticMinMatch)
                     {
                         //GIVE POINTS
 
                         int points = 0;
-                        points += grid.GetCurrentTokens()[c, r].points;
 
-                        Destroy(grid.GetCurrentTokens()[c, r].gameObject);
-                        grid.GetCurrentTokens()[c, r] = null;
-
-                        for (int i = 1; i <= automaticMatch - 1; i++)
+                        foreach (Vector2 v in tokenToDeleteIndex)
                         {
-                            if (c - i >= 0 && grid.GetCurrentTokens()[c - i, r] != null)
-                            {
-                                points += grid.GetCurrentTokens()[c - i, r].points;
-                                Destroy(grid.GetCurrentTokens()[c - i, r].gameObject);
-                                grid.GetCurrentTokens()[c - i, r] = null;
-                            }
-
-                            if (c + i < grid.GetUsedColumns() && grid.GetCurrentTokens()[c + i, r] != null)
-                            {
-                                points += grid.GetCurrentTokens()[c + i, r].points;
-                                Destroy(grid.GetCurrentTokens()[c + i, r].gameObject);
-                                grid.GetCurrentTokens()[c + i, r] = null;
-                            }
-
+                            points += grid.GetCurrentTokens()[(int)v.x, (int)v.y].points;
+                            Destroy(grid.GetCurrentTokens()[(int)v.x, (int)v.y].gameObject);
+                            grid.GetCurrentTokens()[(int)v.x, (int)v.y] = null;
                         }
 
                         points *= findSameColor;
@@ -632,6 +669,7 @@ public class GameManager : MonoBehaviour
                         isDone = false;
                     }
 
+                    tokenToDeleteIndex.Clear();
                     findSameColor = 0;
                 }
             }
@@ -644,6 +682,8 @@ public class GameManager : MonoBehaviour
     {
         bool isDone = true;
         int findSameColor = 0;
+        List<Vector2> tokenToDeleteIndex = new List<Vector2>();
+
 
         for (int r = 0; r < grid.GetUsedRows(); r++)
         {
@@ -652,69 +692,77 @@ public class GameManager : MonoBehaviour
                 if (r != 0 && r < grid.GetUsedRows() - 1)
                 {
                     findSameColor++;
+                    tokenToDeleteIndex.Add(new Vector2(c, r));
 
-                    int automaticMatch = 0;
+                    int automaticMinMatch = 0;
+                    int automaticLoop = 0;
                     if (minimumMatch % 2 == 0)
                     {
-                        automaticMatch = minimumMatch - 1;
+                        automaticMinMatch = minimumMatch - 1;
                     }
                     else
                     {
-                        automaticMatch = minimumMatch;
+                        automaticMinMatch = minimumMatch;
                     }
 
+                    automaticLoop = grid.GetUsedRows() / 2;
 
                     if (grid.GetCurrentTokens()[c, r] != null)
                     {
-                        for (int i = 1; i <= automaticMatch - 1; i++)
+                        for (int i = 1; i <= automaticLoop; i++)
                         {
-
                             if (r - i >= 0 && grid.GetCurrentTokens()[c, r - i] != null)
                             {
                                 if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c, r - i].tokenType)
                                 {
                                     findSameColor++;
+                                    tokenToDeleteIndex.Add(new Vector2(c, r - i));
+                                }
+                                else
+                                {
+                                    i = automaticLoop;
                                 }
                             }
+                            else
+                            {
+                                i = automaticLoop;
+                            }
+                        }
 
+                        for (int i = 1; i <= automaticLoop; i++)
+                        {
                             if (r + i < grid.GetUsedRows() && grid.GetCurrentTokens()[c, r + i] != null)
                             {
                                 if (grid.GetCurrentTokens()[c, r].tokenType == grid.GetCurrentTokens()[c, r + i].tokenType)
                                 {
                                     findSameColor++;
+                                    tokenToDeleteIndex.Add(new Vector2(c, r+i));
                                 }
+                                else
+                                {
+                                    i = automaticLoop;
+                                }
+                            }
+                            else
+                            {
+                                i = automaticLoop;
                             }
                         }
                     }
 
                     
 
-                    if (findSameColor >= automaticMatch)
+                    if (findSameColor >= automaticMinMatch)
                     {
                         //GIVE POINTS
 
                         int points = 0;
-                        points += grid.GetCurrentTokens()[c, r].points;
 
-                        Destroy(grid.GetCurrentTokens()[c, r].gameObject);
-                        grid.GetCurrentTokens()[c, r] = null;
-
-                        for (int i = 1; i <= automaticMatch - 1; i++)
+                        foreach (Vector2 v in tokenToDeleteIndex)
                         {
-                            if (r - i >= 0 && grid.GetCurrentTokens()[c, r - i] != null)
-                            {
-                                points += grid.GetCurrentTokens()[c, r - i].points;
-                                Destroy(grid.GetCurrentTokens()[c, r - i].gameObject);
-                                grid.GetCurrentTokens()[c, r - i] = null;
-                            }
-
-                            if (r + i < grid.GetUsedRows() && grid.GetCurrentTokens()[c, r + i] != null)
-                            {
-                                points += grid.GetCurrentTokens()[c, r + i].points;
-                                Destroy(grid.GetCurrentTokens()[c, r + i].gameObject);
-                                grid.GetCurrentTokens()[c, r + i] = null;
-                            }
-
+                            points += grid.GetCurrentTokens()[(int)v.x, (int)v.y].points;
+                            Destroy(grid.GetCurrentTokens()[(int)v.x, (int)v.y].gameObject);
+                            grid.GetCurrentTokens()[(int)v.x, (int)v.y] = null;
                         }
 
                         points *= findSameColor;
@@ -728,6 +776,7 @@ public class GameManager : MonoBehaviour
                         isDone = false;
                     }
 
+                    tokenToDeleteIndex.Clear();
                     findSameColor = 0;
                 }
             }
