@@ -1,6 +1,6 @@
 ## Simple! Match3
 
-## Lastest Release : https://github.com/frankvega2010/Simple-Match3/releases/tag/v0.1.1
+## Latest Release : https://github.com/frankvega2010/Simple-Match3/releases/tag/v0.1.1
 
 It's recommended that you have a 1920x1080 screen size or higher to avoid issues. (Otherwise play the game on the editor)
 
