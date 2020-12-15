@@ -1,11 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "Token Data", menuName = "Frank/TokenData", order = 1)]
-public class TokenInfo : ScriptableObject
+namespace SimpleMatch3.Gameplay
 {
-    public Token.TOKEN_TYPES tokenType;
-    public Sprite icon;
-    public int points;
+    [CreateAssetMenu(fileName = "Token Data", menuName = "Frank/TokenData", order = 1)]
+    public class TokenInfo : ScriptableObject
+    {
+        public Token.TOKEN_TYPES tokenType;
+        public Sprite icon;
+        public int points;
+    }
 }
