@@ -1113,6 +1113,7 @@ GameObject:
   - component: {fileID: 1026787175}
   - component: {fileID: 1026787176}
   - component: {fileID: 1026787177}
+  - component: {fileID: 1026787178}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -1132,7 +1133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49f35117277d946418012714d667bce8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileSpacing: 65
+  tileSpacing: 100
   rows: 7
   columns: 7
   initialTransform: {fileID: 1819153130}
@@ -1315,6 +1316,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   singleUseAudioPrefab: {fileID: 4014200540807347005, guid: cb887a37078f06a4fb8bf13bae38f444, type: 3}
   audioSourcePool: []
+--- !u!114 &1026787178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1026787171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c03d544d85ab3b43823666d88f4a4b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1185040944
 GameObject:
   m_ObjectHideFlags: 0
