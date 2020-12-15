@@ -12,11 +12,19 @@ public class GameManager : MonoBehaviour
 
     [Header("Main Config"),Space]
     public BoardGrid grid = null;
+    public GameObject singleUseAudioPrefab = null;
     public int minimumMatch = 0;
     public int maxTurns = 0;
-    public int currentPoints = 0;
+
+    [Header("Audio Config"), Space]
+    public AudioClip[] tokenSelectSound;
+    public AudioClip tokenDeselectSound;
+    public AudioClip[] comboSound;
+    public AudioSource backgroundMusic;
+    private AudioSource audioSource;
 
     [Header("Public Data"), Space]
+    public int currentPoints = 0;
     public List<Token> currentChain = new List<Token>();
     public bool inputEnabled = false;
     [SerializeField]
@@ -30,6 +38,7 @@ public class GameManager : MonoBehaviour
     {
         Token.OnTokenSelected += CheckTokenChain;
         Token.OnTokenLerpFinish += CheckInputAvailability;
+        audioSource = GetComponent<AudioSource>();
         Restart();
     }
 
@@ -43,7 +52,6 @@ public class GameManager : MonoBehaviour
 
         if(Input.GetMouseButtonUp(0))
         {
-            //CheckTokenChain(null);
             DoMatch();
         }
     }
@@ -69,6 +77,7 @@ public class GameManager : MonoBehaviour
             OnGameStart(0);
         }
 
+        backgroundMusic.pitch = 1;
         currentChain.Clear();
         grid.GenerateGrid();
         AdjustGrid();
@@ -109,16 +118,19 @@ public class GameManager : MonoBehaviour
 
                     turnsLeft--;
 
+                    if(turnsLeft <= Mathf.Round(maxTurns * 0.25f))
+                    {
+                        backgroundMusic.pitch = 1.85f;
+                    }
+
                     if (OnPlayerMatch != null)
                     {
                         OnPlayerMatch(turnsLeft);
                     }
 
-                    
+                    PlayComboSound();
 
                 }
-
-
             }
             else // Cancel Chain
             {
@@ -143,6 +155,7 @@ public class GameManager : MonoBehaviour
             {
                 currentChain.Add(currentToken);
                 currentToken.OnAdd();
+                PlaySelectSound();
             }
             else
             {
@@ -153,6 +166,7 @@ public class GameManager : MonoBehaviour
                         Token tokenToRemove = currentChain[currentChain.Count - 1];
                         currentChain.Remove(tokenToRemove);
                         tokenToRemove.OnRemove();
+                        PlayDeselectSound();
                         tokenWasDeleted = true;
                     }
                 }
@@ -165,6 +179,7 @@ public class GameManager : MonoBehaviour
                         {
                             currentChain.Add(currentToken);
                             currentToken.OnAdd();
+                            PlaySelectSound();
                         }
                     }
                 }
@@ -687,6 +702,8 @@ public class GameManager : MonoBehaviour
                     {
                         //GIVE POINTS
 
+                        PlayComboSound();
+
                         int points = 0;
 
                         foreach (Vector2 v in tokenToDeleteIndex)
@@ -795,6 +812,8 @@ public class GameManager : MonoBehaviour
                     {
                         //GIVE POINTS
 
+                        PlayComboSound();
+
                         int points = 0;
 
                         foreach (Vector2 v in tokenToDeleteIndex)
@@ -822,6 +841,35 @@ public class GameManager : MonoBehaviour
         }
 
         return isDone;
+    }
+
+    public void PlaySelectSound()
+    {
+        int randomIndex = Random.Range(0, tokenSelectSound.Length);
+
+        if (audioSource)
+        {
+            audioSource.clip = tokenSelectSound[randomIndex];
+            audioSource.Play();
+        }
+    }
+
+    public void PlayDeselectSound()
+    {
+        if (audioSource)
+        {
+            audioSource.clip = tokenDeselectSound;
+            audioSource.Play();
+        }
+    }
+
+    public void PlayComboSound()
+    {
+        int randomIndex = Random.Range(0, comboSound.Length);
+
+        GameObject newSound = Instantiate(singleUseAudioPrefab);
+        newSound.SetActive(true);
+        newSound.GetComponent<AudioSourceSingleTime>().SetUpAndPlayClip(comboSound[randomIndex]);
     }
 
     private void OnDestroy()
