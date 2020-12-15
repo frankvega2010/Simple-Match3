@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class Token : MonoBehaviour , IPointerClickHandler
+public class Token : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler
 {
 
     public delegate void OnTokenAction(Token currentToken);
@@ -102,14 +102,23 @@ public class Token : MonoBehaviour , IPointerClickHandler
         startLerp = true;
     }
 
-    //Detect if a click occurs
-    public void OnPointerClick(PointerEventData pointerEventData)
+    public void OnPointerDown(PointerEventData eventData)
     {
         if (OnTokenSelected != null)
         {
             OnTokenSelected(this);
         }
+    }
 
-       // Debug.Log("SELECTED");
+    //Detect if the Cursor starts to pass over the GameObject
+    public void OnPointerEnter(PointerEventData pointerEventData)
+    {
+        if(Input.GetMouseButton(0))
+        {
+            if (OnTokenSelected != null)
+            {
+                OnTokenSelected(this);
+            }
+        }
     }
 }

@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
     public delegate void OnGameManagerAction(int amount);
     public static OnGameManagerAction OnPlayerScore;
     public static OnGameManagerAction OnPlayerMatch;
+    public static OnGameManagerAction OnGameFinished;
+    public static OnGameManagerAction OnGameStart;
 
     [Header("Main Config"),Space]
     public BoardGrid grid = null;
@@ -20,6 +22,8 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private List<Token> movingTokens = new List<Token>();
     private int turnsLeft = 0;
+    [SerializeField]
+    private bool isGameFinished = false;
 
     // Start is called before the first frame update
     void Start()
@@ -36,12 +40,19 @@ public class GameManager : MonoBehaviour
         {
             Restart();
         }
+
+        if(Input.GetMouseButtonUp(0))
+        {
+            //CheckTokenChain(null);
+            DoMatch();
+        }
     }
 
     public void Restart()
     {
         currentPoints = 0;
         turnsLeft = maxTurns;
+        isGameFinished = false;
 
         if (OnPlayerMatch != null)
         {
@@ -53,15 +64,81 @@ public class GameManager : MonoBehaviour
             OnPlayerScore(currentPoints);
         }
 
+        if(OnGameStart != null)
+        {
+            OnGameStart(0);
+        }
+
         currentChain.Clear();
         grid.GenerateGrid();
         AdjustGrid();
     }
 
+    public void DoMatch()
+    {
+        if(!isGameFinished)
+        {
+            if (currentChain.Count >= minimumMatch) // Do match
+            {
+                if (turnsLeft > 0)
+                {
+                    int points = 0;
+
+                    foreach (Token t in currentChain)
+                    {
+                        points += t.points;
+                        Destroy(grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y].gameObject);
+                        grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y] = null;
+                    }
+
+                    points *= currentChain.Count;
+
+                    currentChain.Clear();
+                    inputEnabled = false;
+                    UpdateGrid();
+                    RefillGrid();
+
+                    //Give points * amount of tokens in chain
+
+                    currentPoints += points;
+
+                    if (OnPlayerScore != null)
+                    {
+                        OnPlayerScore(currentPoints);
+                    }
+
+                    turnsLeft--;
+
+                    if (OnPlayerMatch != null)
+                    {
+                        OnPlayerMatch(turnsLeft);
+                    }
+
+                    
+
+                }
+
+
+            }
+            else // Cancel Chain
+            {
+                foreach (Token t in currentChain)
+                {
+                    t.OnCancel();
+                }
+
+                currentChain.Clear();
+            }
+        }
+        
+    }
+
     public void CheckTokenChain(Token currentToken)
     {
-        if(inputEnabled)
+        if(inputEnabled && !isGameFinished)
         {
+            bool tokenWasDeleted = false;
+
             if (currentChain.Count <= 0)
             {
                 currentChain.Add(currentToken);
@@ -69,76 +146,29 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                if (currentToken == currentChain[currentChain.Count - 1]) // Remove token from chain
+                if (currentChain.Count - 2 >= 0)
                 {
-                    currentChain.Remove(currentToken);
-                    currentToken.OnRemove();
-                }
-                else
-                {
-                    if (CheckAdjacentTokens(currentToken)) // Add new token
+                    if (currentToken == currentChain[currentChain.Count - 2])
                     {
-                        currentChain.Add(currentToken);
-                        currentToken.OnAdd();
+                        Token tokenToRemove = currentChain[currentChain.Count - 1];
+                        currentChain.Remove(tokenToRemove);
+                        tokenToRemove.OnRemove();
+                        tokenWasDeleted = true;
                     }
-                    else
+                }
+
+                if(!tokenWasDeleted)
+                {
+                    if (!currentChain.Contains(currentToken))
                     {
-                        
-                        if (currentChain.Count >= minimumMatch) // Do match
+                        if (CheckAdjacentTokens(currentToken)) // Add new token
                         {
-                            if (turnsLeft > 0)
-                            {
-                                int points = 0;
-
-                                foreach (Token t in currentChain)
-                                {
-                                    points += t.points;
-                                    Destroy(grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y].gameObject);
-                                    grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y] = null;
-                                }
-
-                                points *= currentChain.Count;
-
-                                currentChain.Clear();
-                                inputEnabled = false;
-                                UpdateGrid();
-                                RefillGrid();
-
-                                //Give points * amount of tokens in chain
-
-                                currentPoints += points;
-
-                                if (OnPlayerScore != null)
-                                {
-                                    OnPlayerScore(currentPoints);
-                                }
-
-                                turnsLeft--;
-
-                                if(OnPlayerMatch != null)
-                                {
-                                    OnPlayerMatch(turnsLeft);
-                                }
-
-                                if(turnsLeft <= 0)
-                                {
-                                    // GAME FINISHED
-                                }
-                            }
-                            
-
-                        }
-                        else // Cancel Chain
-                        {
-                            foreach (Token t in currentChain)
-                            {
-                                t.OnCancel();
-                            }
-
-                            currentChain.Clear();
+                            currentChain.Add(currentToken);
+                            currentToken.OnAdd();
                         }
                     }
                 }
+                
             }
         }
         
@@ -365,14 +395,23 @@ public class GameManager : MonoBehaviour
             movingTokens.Remove(currentToken);
         }
 
-        //movingTokens.Remove(currentToken);
-
         if (movingTokens.Count <= 0)
         {
-            //Debug.Log("nice");
             if(!IsMatchAvailable())
             {
                 inputEnabled = true;
+
+                if (turnsLeft <= 0)
+                {
+                    // GAME FINISHED
+
+                    isGameFinished = true;
+
+                    if (OnGameFinished != null)
+                    {
+                        OnGameFinished(0);
+                    }
+                }
             }
         }
     }
