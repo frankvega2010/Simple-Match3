@@ -10,6 +10,7 @@ public class Token : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler
     public delegate void OnTokenAction(Token currentToken);
     public static OnTokenAction OnTokenSelected;
     public static OnTokenAction OnTokenLerpFinish;
+    public static OnTokenAction OnTokenFinishRemoveAnimation;
     public static int id;
 
     public enum TOKEN_TYPES
@@ -44,10 +45,12 @@ public class Token : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler
     private Image iconImage;
     private bool startLerp;
     private float lerpValue;
+    private Animator animator;
 
     // Start is called before the first frame update
     void Awake()
     {
+        animator = GetComponent<Animator>();
         iconImage = GetComponent<Image>();
         id++;
         name = "Token " + id;
@@ -107,6 +110,20 @@ public class Token : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler
         if (OnTokenSelected != null)
         {
             OnTokenSelected(this);
+        }
+    }
+
+    public void ExecuteAnimation(string animationName)
+    {
+        animator.Play(animationName);
+        //animator.SetTrigger(animationName);
+    }
+    
+    public void OnFinishedRemoveAnimation()
+    {
+        if(OnTokenFinishRemoveAnimation != null)
+        {
+            OnTokenFinishRemoveAnimation(this);
         }
     }
 

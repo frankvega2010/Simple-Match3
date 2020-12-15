@@ -12,11 +12,11 @@ public class GameManager : MonoBehaviour
 
     [Header("Main Config"),Space]
     public BoardGrid grid = null;
-    public GameObject singleUseAudioPrefab = null;
     public int minimumMatch = 0;
     public int maxTurns = 0;
 
     [Header("Audio Config"), Space]
+    public AudioSourcePool comboSoundPool;
     public AudioClip[] tokenSelectSound;
     public AudioClip tokenDeselectSound;
     public AudioClip[] comboSound;
@@ -96,7 +96,9 @@ public class GameManager : MonoBehaviour
                     foreach (Token t in currentChain)
                     {
                         points += t.points;
-                        Destroy(grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y].gameObject);
+                        //Destroy(grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y].gameObject);
+                        grid.DestroyTokenAnimated(grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y]);
+                        grid.GetCurrentTokensGameObject()[(int)t.gridIndex.x, (int)t.gridIndex.y] = null;
                         grid.GetCurrentTokens()[(int)t.gridIndex.x, (int)t.gridIndex.y] = null;
                     }
 
@@ -345,12 +347,12 @@ public class GameManager : MonoBehaviour
                             grid.GetCurrentTokensGameObject()[c, r] = null;
 
                             currentTokens[c, newTokenRow].oldPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
-                                + new Vector2(c * (currentTokens[c, newTokenRow].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
-                                               r * (-currentTokens[c, newTokenRow].GetComponent<RectTransform>().rect.height - grid.tileSpacing));
+                                + new Vector2(c * (grid.tileSpacing),
+                                               r * (grid.tileSpacing));
 
                             currentTokens[c, newTokenRow].newPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
-                                + new Vector2(c * (currentTokens[c, newTokenRow].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
-                                     newTokenRow * (-currentTokens[c, newTokenRow].GetComponent<RectTransform>().rect.height - grid.tileSpacing));
+                                + new Vector2(c * (grid.tileSpacing),
+                                     newTokenRow * (-grid.tileSpacing));
 
                             currentTokens[c, newTokenRow].gridIndex = new Vector2(c, newTokenRow);
                             currentTokens[c, newTokenRow].StartLerp();
@@ -359,7 +361,6 @@ public class GameManager : MonoBehaviour
                             {
                                 movingTokens.Add(currentTokens[c, newTokenRow]);
                             }
-                            //movingTokens.Add(currentTokens[c, newTokenRow]);
                         }
 
                     }
@@ -382,13 +383,13 @@ public class GameManager : MonoBehaviour
                     grid.SpawnNewToken(c, r);
 
                     currentTokens[c, r].oldPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
-                        + new Vector2(c * (currentTokens[c, r].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
+                        + new Vector2(c * (grid.tileSpacing),
                                        0)
                         + new Vector2(0,+250);
 
                     currentTokens[c, r].newPosition = new Vector2(grid.initialTransform.position.x, grid.initialTransform.position.y)
-                        + new Vector2(c * (currentTokens[c, r].GetComponent<RectTransform>().rect.width + grid.tileSpacing),
-                             r * (-currentTokens[c, r].GetComponent<RectTransform>().rect.height - grid.tileSpacing));
+                        + new Vector2(c * (grid.tileSpacing),
+                             r * (-grid.tileSpacing));
 
                     if (!movingTokens.Contains(currentTokens[c, r]))
                     {
@@ -709,7 +710,9 @@ public class GameManager : MonoBehaviour
                         foreach (Vector2 v in tokenToDeleteIndex)
                         {
                             points += grid.GetCurrentTokens()[(int)v.x, (int)v.y].points;
-                            Destroy(grid.GetCurrentTokens()[(int)v.x, (int)v.y].gameObject);
+                            grid.DestroyTokenAnimated(grid.GetCurrentTokens()[(int)v.x, (int)v.y]);
+                           // Destroy(grid.GetCurrentTokens()[(int)v.x, (int)v.y].gameObject);
+                           grid.GetCurrentTokensGameObject()[(int)v.x, (int)v.y] = null;
                             grid.GetCurrentTokens()[(int)v.x, (int)v.y] = null;
                         }
 
@@ -819,7 +822,9 @@ public class GameManager : MonoBehaviour
                         foreach (Vector2 v in tokenToDeleteIndex)
                         {
                             points += grid.GetCurrentTokens()[(int)v.x, (int)v.y].points;
-                            Destroy(grid.GetCurrentTokens()[(int)v.x, (int)v.y].gameObject);
+                            grid.DestroyTokenAnimated(grid.GetCurrentTokens()[(int)v.x, (int)v.y]);
+                            //Destroy(grid.GetCurrentTokens()[(int)v.x, (int)v.y].gameObject);}
+                            grid.GetCurrentTokensGameObject()[(int)v.x, (int)v.y] = null;
                             grid.GetCurrentTokens()[(int)v.x, (int)v.y] = null;
                         }
 
@@ -867,9 +872,10 @@ public class GameManager : MonoBehaviour
     {
         int randomIndex = Random.Range(0, comboSound.Length);
 
-        GameObject newSound = Instantiate(singleUseAudioPrefab);
+        /*GameObject newSound = Instantiate(singleUseAudioPrefab);
         newSound.SetActive(true);
-        newSound.GetComponent<AudioSourceSingleTime>().SetUpAndPlayClip(comboSound[randomIndex]);
+        newSound.GetComponent<AudioSourceSingleTime>().SetUpAndPlayClip(comboSound[randomIndex]);*/
+        comboSoundPool.PlaySound(comboSound[randomIndex]);
     }
 
     private void OnDestroy()

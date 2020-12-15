@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4014200540807346945}
   - component: {fileID: 1819153133}
   - component: {fileID: 1819153132}
+  - component: {fileID: 363614307}
   m_Layer: 5
   m_Name: Token
   m_TagString: Untagged
@@ -68,7 +69,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e942f91e6c895574d89b02014076d040, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 36b13c819c5a5614290818c4740ca1bc, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -92,6 +93,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tokenType: 0
   icon: {fileID: 0}
+  points: 0
   moveSpeed: 5
   selectedColor: {r: 0.2735849, g: 0.2735849, b: 0.2735849, a: 1}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
@@ -145,3 +147,22 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!95 &363614307
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4014200540807347005}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 4bfd9e0e4f330d241a68076632d385ff, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0

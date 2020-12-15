@@ -1112,6 +1112,7 @@ GameObject:
   - component: {fileID: 1026787174}
   - component: {fileID: 1026787175}
   - component: {fileID: 1026787176}
+  - component: {fileID: 1026787177}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -1131,9 +1132,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49f35117277d946418012714d667bce8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileSpacing: 0
+  tileSpacing: 65
   rows: 7
-  columns: 8
+  columns: 7
   initialTransform: {fileID: 1819153130}
   board: {fileID: 596317786}
   tokenPrefab: {fileID: 4014200540807347005, guid: 9b6bfc77287790444886ac31648b38d2, type: 3}
@@ -1142,6 +1143,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d9a45533b17cb1e4d8dc76ddf39be4d9, type: 2}
   - {fileID: 11400000, guid: bfaa2859513dc4a4c8719ee85daedeec, type: 2}
   - {fileID: 11400000, guid: 87d6cdad45c1c5e4d808e580c051f342, type: 2}
+  tokensPool: []
 --- !u!4 &1026787173
 Transform:
   m_ObjectHideFlags: 0
@@ -1169,9 +1171,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grid: {fileID: 1026787172}
-  singleUseAudioPrefab: {fileID: 4014200540807347005, guid: cb887a37078f06a4fb8bf13bae38f444, type: 3}
   minimumMatch: 3
-  maxTurns: 3
+  maxTurns: 10
+  comboSoundPool: {fileID: 1026787177}
   tokenSelectSound:
   - {fileID: 8300000, guid: 4bd13985bb47209449ebddf6cde967ee, type: 3}
   - {fileID: 8300000, guid: 4bd13985bb47209449ebddf6cde967ee, type: 3}
@@ -1299,6 +1301,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1026787177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1026787171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d39ed94a5137f0944984d06ccdfe6a7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  singleUseAudioPrefab: {fileID: 4014200540807347005, guid: cb887a37078f06a4fb8bf13bae38f444, type: 3}
+  audioSourcePool: []
 --- !u!1 &1185040944
 GameObject:
   m_ObjectHideFlags: 0
@@ -1821,14 +1837,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Token
       objectReference: {fileID: 0}
-    - target: {fileID: 4014200540807347005, guid: 9b6bfc77287790444886ac31648b38d2, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4014200540807347007, guid: 9b6bfc77287790444886ac31648b38d2, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 21300000, guid: 36b13c819c5a5614290818c4740ca1bc, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9b6bfc77287790444886ac31648b38d2, type: 3}
 --- !u!224 &1819153130 stripped

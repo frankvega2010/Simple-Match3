@@ -4,12 +4,10 @@ using UnityEngine;
 
 public class AudioSourceSingleTime : MonoBehaviour
 {
-    public AudioSource audioSource;
+    public delegate void OnAudioSourceAction(AudioSourceSingleTime currentAudioSource);
+    public static OnAudioSourceAction OnAudioFinished;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
+    public AudioSource audioSource;
 
     public void SetUpAndPlayClip(AudioClip audioClip)
     {
@@ -18,7 +16,16 @@ public class AudioSourceSingleTime : MonoBehaviour
             audioSource.enabled = true;
             audioSource.clip = audioClip;
             audioSource.Play();
-            Destroy(gameObject, audioClip.length);
         }
+    }
+
+    public void DeActivate()
+    {
+        if (OnAudioFinished != null)
+        {
+            OnAudioFinished(this);
+        }
+
+        gameObject.SetActive(false);
     }
 }
